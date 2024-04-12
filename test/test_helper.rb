@@ -62,6 +62,10 @@ class Minitest::Test
     ENV["ADAPTER"] == "redshift"
   end
 
+  def sql_server?
+    ENV["ADAPTER"] == "sqlserver"
+  end
+
   def create_user(created_at, score = 1)
     created_at = created_at.utc.to_s if created_at.is_a?(Time)
 
@@ -104,6 +108,10 @@ class Minitest::Test
     elsif sqlite? && (method == :quarter || (options[:time_zone] && options[:time_zone] != "bad") || options[:day_start] || (Time.zone && options[:time_zone] != false))
       error = assert_raises(Groupdate::Error) { User.group_by_period(method, field, **options).count }
       assert_includes error.message, "not supported for SQLite"
+      skip
+    elsif sql_server? && (method == :quarter || (options[:time_zone] && options[:time_zone] != "bad") || options[:day_start] || (Time.zone && options[:time_zone] != false))
+      error = assert_raises(Groupdate::Error) { User.group_by_period(method, field, **options).count }
+      assert_includes error.message, "not supported for SQLServer"
       skip
     else
       User.group_by_period(method, field, **options).count

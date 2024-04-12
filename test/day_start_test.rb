@@ -174,14 +174,14 @@ class DayStartTest < Minitest::Test
   end
 
   def test_decimal_hour_of_day
-    skip if sqlite?
+    skip if sqlite? || sql_server?
     assert_result :hour_of_day, 23, "2013-05-04 02:29:59", false, day_start: 2.5
   end
 
   # invalid
 
   def test_too_small
-    skip "call_method expects different error message" if sqlite?
+    skip "call_method expects different error message" if sqlite? || sql_server?
 
     error = assert_raises(ArgumentError) do
       call_method(:day, :created_at, day_start: -1)
@@ -190,7 +190,7 @@ class DayStartTest < Minitest::Test
   end
 
   def test_too_large
-    skip "call_method expects different error message" if sqlite?
+    skip "call_method expects different error message" if sqlite? || sql_server?
 
     error = assert_raises(ArgumentError) do
       call_method(:day, :created_at, day_start: 24)
@@ -199,7 +199,7 @@ class DayStartTest < Minitest::Test
   end
 
   def test_bad_method
-    skip "call_method expects different error message" if sqlite?
+    skip "call_method expects different error message" if sqlite? || sql_server?
 
     error = assert_raises(ArgumentError) do
       call_method(:minute, :created_at, day_start: 24)

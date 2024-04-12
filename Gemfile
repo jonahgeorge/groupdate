@@ -10,3 +10,5 @@ gem "mysql2"
 gem "trilogy"
 gem "sqlite3", "< 2"
 gem "ruby-prof", require: false
+gem "activerecord-sqlserver-adapter"
+gem "tiny_tds"
