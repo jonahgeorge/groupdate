@@ -9,4 +9,6 @@ gem "pg"
 gem "mysql2"
 gem "trilogy"
 gem "sqlite3"
+gem "activerecord-sqlserver-adapter"
+gem "tiny_tds"
 gem "ruby-prof", require: false
