@@ -9,8 +9,14 @@ module Groupdate
     end
 
     def calculate(*args, &block)
+      puts "calculate"
+      puts "calculate"
+      puts "calculate"
+      puts "calculate"
+      puts "calculate"
+      puts "calculate"
       # prevent calculate from being called twice
-      return super if has_include?(args[1])
+      # return super if has_include?(args[1])
 
       default_value = [:count, :sum].include?(args[0]) ? 0 : nil
       Groupdate.process_result(self, super, default_value: default_value)

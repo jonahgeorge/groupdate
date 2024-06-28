@@ -59,6 +59,10 @@ class Minitest::Test
     ENV["ADAPTER"] == "redshift"
   end
 
+  def sql_server?
+    ENV["ADAPTER"] == "sqlserver"
+  end
+
   def create_user(created_at, score = 1)
     created_at = created_at.utc.to_s if created_at.is_a?(Time)
 

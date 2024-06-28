@@ -89,6 +89,8 @@ class ColumnTest < Minitest::Test
       "datetime('now')"
     elsif redshift?
       "GETDATE()"
+    elsif sql_server?
+      "GETDATE()"
     else
       "NOW()"
     end
