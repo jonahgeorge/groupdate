@@ -1,0 +1,31 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    ports:
+      - 1433:1433
+    environment:
+      MSSQL_SA_PASSWORD: yourStrongPassword123
+      ACCEPT_EULA: Y
+      MSSQL_PID: Evaluation
+    volumes:
+      - ./tmp/mssql:/var/opt/mssql
+
+  postgres:
+    image: postgres:15.4-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: groupdate
+      POSTGRES_PASSWORD: groupdate
+    volumes:
+      - ./tmp/postgres:/var/lib/postgresql/data
+
+  mysql:
+    image: mysql:8.4
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: Y
+    volumes:
+      - ./tmp/mysql:/var/lib/mysql

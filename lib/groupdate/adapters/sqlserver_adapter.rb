@@ -2,49 +2,47 @@ module Groupdate
   module Adapters
     class SqlServerAdapter < BaseAdapter
       def group_clause
-        raise Groupdate::Error, "Time zones not supported for SQL Server" unless @time_zone.utc_offset.zero?
-        raise Groupdate::Error, "day_start not supported for SQL Server" unless day_start.zero?
+        time_zone = @time_zone.formatted_offset
+        day_start_column = "DATEADD(SECOND, ?, SWITCHOFFSET(#{column}, ?))"
+        day_start_interval = day_start * -1
 
         query =
           case period
           when :minute_of_hour
-            ["DATEPART(MINUTE, #{column})"]
+            ["CAST(DATEPART(MINUTE, #{day_start_column}) AS INT)", day_start_interval, time_zone]
           when :hour_of_day
-            ["DATEPART(HOUR, #{column})"]
+            ["CAST(DATEPART(HOUR, #{day_start_column}) AS INT)", day_start_interval, time_zone]
           when :day_of_week
-            ["DATEPART(WEEKDAY, #{column})"]
+            ["CAST(DATEPART(WEEKDAY, #{day_start_column}) AS INT) - 1", day_start_interval, time_zone]
           when :day_of_month
-            ["DATEPART(DAY, #{column})"]
+            ["CAST(DAY(#{day_start_column}) AS INT)", day_start_interval, time_zone]
           when :day_of_year
-            ["DATEPART(DAYOFYEAR, #{column})"]
+            ["CAST(DATEPART(DAYOFYEAR, #{day_start_column}) AS INT)", day_start_interval, time_zone]
           when :month_of_year
-            ["DATEPART(MONTH, #{column})"]
+            ["CAST(MONTH(#{day_start_column}) AS INT)", day_start_interval, time_zone]
           when :week
-            ["DATEADD(WEEK, DATEDIFF(WEEK, 0, #{column}), 0)"]
+            ["CAST(DATETRUNC(WEEK, #{day_start_column}) AS DATE)", day_start_interval, time_zone]
           when :quarter
-            ["DATEADD(QUARTER, DATEDIFF(QUARTER, 0, #{column}), 0)"]
+            ["CAST(DATETRUNC(QUARTER, #{day_start_column}) AS DATE)", day_start_interval, time_zone]
           when :day
-            ["DATEADD(DAY, DATEDIFF(DAY, 0, #{column}), 0)"]
+            ["CAST(DATETRUNC(DAY, #{day_start_column}) AS DATE)", day_start_interval, time_zone]
           when :month
-            ["DATEADD(MONTH, DATEDIFF(MONTH, 0, #{column}), 0)"]
+            ["CAST(DATETRUNC(MONTH, #{day_start_column}) AS DATE)", day_start_interval, time_zone]
           when :year
-            ["DATEADD(YEAR, DATEDIFF(YEAR, 0, #{column}), 0)"]
+            ["CAST(DATETRUNC(YEAR, #{day_start_column}) AS DATE)", day_start_interval, time_zone]
+          when :custom
+            ["DATEADD(SECOND, CAST(LEFT(FLOOR(DATEDIFF(SECOND, '1970-01-01', #{column}) / ?) * ?, 10) AS INT), '1970-01-01')", n_seconds, n_seconds]
           when :second
-            # ["DATEADD(SECOND, DATEDIFF(SECOND, 0, #{column}), 0)"]
-
-            # Raises the following error:
-            # The datediff function resulted in an overflow. The number of dateparts separating two date/time instances is too large.
-            # Try to use datediff with a less precise datepart. (TinyTds::Error)
-            raise Groupdate::Error, "Second not supported for SQLServer"
+            ["DATETRUNC(SECOND, #{day_start_column})", day_start_interval, time_zone]
           when :minute
-            ["DATEADD(MINUTE, DATEDIFF(MINUTE, 0, #{column}), 0)"]
+            ["DATETRUNC(MINUTE, #{day_start_column})", day_start_interval, time_zone]
           when :hour
-            ["DATEADD(HOUR, DATEDIFF(HOUR, 0, #{column}), 0)"]
+            ["DATETRUNC(HOUR, #{day_start_column})", day_start_interval, time_zone]
           else
             raise Groupdate::Error, "'#{period}' not supported for SQL Server"
           end
 
-        @relation.send(:sanitize_sql_array, query)
+          @relation.send(:sanitize_sql_array, query)
       end
     end
   end
