@@ -24,7 +24,13 @@ class ColumnTest < Minitest::Test
   end
 
   def test_string_function_arel
-    assert_empty User.joins(:posts).group_by_day(Arel.sql(now_function)).count
+    if sql_server?
+      assert_raises(ActiveRecord::StatementInvalid) do
+        User.joins(:posts).group_by_day(Arel.sql(now_function)).count
+      end
+    else
+      assert_empty User.joins(:posts).group_by_day(Arel.sql(now_function)).count
+    end
   end
 
   def test_symbol_with_join
@@ -88,6 +94,8 @@ class ColumnTest < Minitest::Test
     if sqlite?
       "datetime('now')"
     elsif redshift?
+      "GETDATE()"
+    elsif sql_server?
       "GETDATE()"
     else
       "NOW()"
